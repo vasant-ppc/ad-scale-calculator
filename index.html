@@ -836,14 +836,14 @@
         <label>Performance ROAS
           <span class="info" data-tip="Revenue divided by performance spend. Change this to recompute performance revenue. Or type a new revenue below and ROAS updates automatically.">i</span>
         </label>
-        <input type="number" id="inBasePerfRoas" value="4.5" step="0.1" min="0" />
+        <input type="number" id="inBasePerfRoas" value="5" step="0.1" min="0" />
         <div class="hint">Perf. revenue ÷ perf. spend</div>
       </div>
       <div class="input-field">
         <label>Perf. revenue (month)
           <span class="info" data-tip="Direct-attributed revenue from your performance channels last month. Linked to spend and ROAS — editing any two updates the third.">i</span>
         </label>
-        <input type="number" id="inBasePerfRev" value="3600000" step="10000" />
+        <input type="number" id="inBasePerfRev" value="4000000" step="10000" />
         <div class="hint">Direct revenue from perf. channels</div>
       </div>
       <div class="input-field">
@@ -857,21 +857,21 @@
         <label>Awareness ROAS
           <span class="info" data-tip="Conservative assisted revenue ratio for awareness channels. Default 0.5x because awareness is brand-building, not direct-response. Real assisted revenue is usually higher but invisible in last-click reports. Editable.">i</span>
         </label>
-        <input type="number" id="inBaseAwareRoas" value="0.5" step="0.05" min="0" />
+        <input type="number" id="inBaseAwareRoas" value="0" step="0.05" min="0" />
         <div class="hint">Typical 0.3x – 1.0x</div>
       </div>
       <div class="input-field">
         <label>Awareness assisted rev.
           <span class="info" data-tip="Assisted revenue from awareness channels. Linked to awareness spend and awareness ROAS — editing any two updates the third.">i</span>
         </label>
-        <input type="number" id="inBaseAwareRev" value="75000" step="5000" min="0" />
+        <input type="number" id="inBaseAwareRev" value="0" step="5000" min="0" />
         <div class="hint">Spend × awareness ROAS</div>
       </div>
       <div class="input-field">
         <label>Gross margin %
           <span class="info" data-tip="Contribution margin after COGS, shipping, payment fees, returns, and packaging — BEFORE fixed costs like rent, salaries, agency fees. Typical e-commerce: 25-45%.">i</span>
         </label>
-        <input type="number" id="inMargin" value="35" min="1" max="95" step="0.5" />
+        <input type="number" id="inMargin" value="40" min="1" max="95" step="0.5" />
         <div class="hint">After COGS, shipping, fees</div>
       </div>
     </div>
@@ -1162,9 +1162,9 @@ let PERF_ELASTICITY = 0.76;      // +10% spend → +7.5% revenue
 let AWARE_ELASTICITY = 0.5;      // awareness decays faster
 
 let BASELINE = { perf: 800000, aware: 150000 };
-let BASE_PERF_REV = 3600000;
-let BASE_AWARE_REV = 75000;   // 0.5x of awareness spend — conservative
-let MARGIN = 0.35;
+let BASE_PERF_REV = 4000000;   // 5x of ₹8L perf spend
+let BASE_AWARE_REV = 0;        // 0x — awareness is brand-building, no direct attribution
+let MARGIN = 0.40;
 let FIXED_COSTS = 0;          // monthly fixed costs subtracted when toggle is on
 let FIXED_COSTS_ENABLED = false;
 
@@ -1183,8 +1183,8 @@ const PRESETS = {
   scaling: {
     label: 'Scaling e-com',
     perf: 800000, aware: 150000,
-    perfRev: 3600000, awareRev: 75000,
-    margin: 35, elasticity: 0.76,
+    perfRev: 4000000, awareRev: 0,
+    margin: 40, elasticity: 0.76,
   },
   new: {
     label: 'New brand',
@@ -1831,8 +1831,9 @@ function rebuildFromInputs() {
   rebuildBase();
   resetHistory();
 
-  // Update slider ranges (give plenty of headroom)
-  const maxPerf = Math.max(bp * 4, 3000000);
+  // Update slider ranges — always give headroom beyond the profit peak so the
+  // user can drag past it and see diminishing returns on the other side.
+  const maxPerf = Math.max(bp * 5, REC.perf * 1.6, 3000000);
   const maxAware = Math.max(ba * 5, 800000);
   document.getElementById('perfSlider').min = Math.max(50000, bp * 0.2);
   document.getElementById('perfSlider').max = maxPerf;
@@ -2250,13 +2251,18 @@ function makeDraggable(elId, getVal, setVal, sensitivity = 5000) {
 // BOOT
 // ========================================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // Try to load from URL first, otherwise use defaults
+  // Try to load from URL first, otherwise use defaults from HTML inputs
   const fromURL = readURL();
   if (!fromURL) {
+    // Read HTML default values into JS state and recompute everything
     rebuildBase();
   }
 
   initMainChart();
+
+  // Now that the chart exists, apply full rebuild so slider ranges,
+  // elasticity hint, and chart curves all sync to the defaults.
+  rebuildFromInputs();
 
   // Set sliders to baseline (or from URL)
   if (!fromURL) {
