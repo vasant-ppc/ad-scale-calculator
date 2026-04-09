@@ -1067,13 +1067,9 @@
         </div>
       </div>
       <div class="proportional-fc-inputs" id="propAllocInputs">
-        <div class="field">
+        <div class="field" style="grid-column: 1 / -1;">
           <label>Digital revenue % of total business</label>
           <input type="number" id="inDigitalPct" value="100" min="0" max="100" step="0.5" />
-        </div>
-        <div class="field">
-          <label>Awareness amplifier</label>
-          <input type="number" id="inAwareAmp" value="1" min="0.5" max="10" step="0.1" />
         </div>
         <div style="grid-column: 1 / -1; display: flex; gap: 16px; flex-wrap: wrap; margin-top: 4px;">
           <label class="sub-toggle-row" style="margin-top: 0;">
@@ -1086,16 +1082,14 @@
           </label>
         </div>
         <div class="proportional-fc-computed" id="propAllocComputed">
-          Fixed costs will be scaled to <strong id="propFcPct">100%</strong> ·
-          Awareness spend will be scaled to <strong id="propAwarePct">100%</strong>
+          Both fixed costs and awareness spend will be scaled to <strong id="propFcPct">100%</strong>
         </div>
       </div>
       <div class="hint" style="margin-top: 10px;">
         <strong>Off:</strong> 100% of awareness spend and fixed costs are subtracted from digital profit.<br>
-        <strong>On:</strong> Only the digital share is subtracted. <strong>Awareness amplifier</strong> (default
-        <strong>1.0</strong>, same treatment as fixed costs) can be bumped to 2–3 if you believe digital awareness
-        has an outsized effect on digital channels specifically — e.g. at 7% digital share and amplifier 3,
-        21% of awareness spend gets charged. Capped at 100% regardless of inputs.
+        <strong>On:</strong> Only the % you set is subtracted — because those costs also benefit offline,
+        organic, and brand. If digital is only 7% of total business revenue, set it to 7 (or higher if you
+        think digital awareness has an outsized effect on digital channels specifically).
       </div>
     </div>
 
@@ -1392,10 +1386,10 @@
         <div class="body">
           If your company's total fixed costs are large but digital is only a small slice of
           total business revenue, don't subtract the whole company's overhead from digital ad
-          profit. The <strong>"Proportional allocation"</strong> toggle lets you scale fixed
-          costs and awareness spend to digital's share of the business. For awareness, an
-          amplifier (default 3×) accounts for the fact that digital awareness has an outsized
-          effect on digital channels specifically.
+          profit. The <strong>"Proportional allocation"</strong> toggle lets you scale both
+          fixed costs and awareness spend to digital's share of the business. Set the digital
+          % higher than the raw share if you believe digital awareness has an outsized effect
+          on digital channels specifically.
         </div>
       </details>
 
@@ -1493,7 +1487,6 @@ let EXCLUDE_AWARENESS = false;
 // Proportional allocation state
 let PROP_ALLOC_ENABLED = false;
 let DIGITAL_PCT = 100;        // 0-100, digital revenue as % of total business
-let AWARE_AMP = 1.0;          // multiplier on digital share for awareness
 let PROP_APPLY_FC = true;
 let PROP_APPLY_AWARE = true;
 
@@ -1545,11 +1538,10 @@ function modelAwareRevenue(awareSpend) {
 }
 
 // Returns the share of awareness spend that counts against digital profit.
-// 1.0 = full spend. < 1.0 = proportional share × amplifier.
+// 1.0 = full spend. When proportional is on, uses the digital % directly.
 function awareShare() {
   if (!PROP_ALLOC_ENABLED || !PROP_APPLY_AWARE) return 1.0;
-  const digitalShare = Math.max(0, Math.min(1, DIGITAL_PCT / 100));
-  return Math.max(0, Math.min(1, digitalShare * AWARE_AMP));
+  return Math.max(0, Math.min(1, DIGITAL_PCT / 100));
 }
 // Returns the share of fixed costs subtracted from digital profit.
 function fcShare() {
@@ -2168,9 +2160,6 @@ function rebuildFromInputs() {
   const digPctEl = document.getElementById('inDigitalPct');
   if (digPctEl) DIGITAL_PCT = parseNum('inDigitalPct', 100);
 
-  const awareAmpEl = document.getElementById('inAwareAmp');
-  if (awareAmpEl) AWARE_AMP = parseNum('inAwareAmp', 3.0);
-
   const propFcEl = document.getElementById('propApplyFC');
   if (propFcEl) PROP_APPLY_FC = propFcEl.checked;
 
@@ -2183,11 +2172,9 @@ function rebuildFromInputs() {
     if (PROP_ALLOC_ENABLED) propInputs.classList.add('visible');
     else propInputs.classList.remove('visible');
   }
-  // Computed % display
+  // Computed % display — both fixed costs and awareness use the same digital share now
   const propFcPctEl = document.getElementById('propFcPct');
-  const propAwarePctEl = document.getElementById('propAwarePct');
   if (propFcPctEl) propFcPctEl.textContent = (fcShare() * 100).toFixed(1) + '%';
-  if (propAwarePctEl) propAwarePctEl.textContent = (awareShare() * 100).toFixed(1) + '%';
 
   // Grey out awareness inputs when excluded
   const awareFieldIds = ['inBaseAware', 'inBaseAwareRoas', 'inBaseAwareRev'];
@@ -2739,7 +2726,7 @@ document.addEventListener('DOMContentLoaded', () => {
       updateAll();
     });
   }
-  ['inDigitalPct', 'inAwareAmp'].forEach((id) => {
+  ['inDigitalPct'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) {
       el.addEventListener('input', () => {
