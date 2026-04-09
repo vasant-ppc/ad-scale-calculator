@@ -1199,12 +1199,11 @@
         <button class="btn-share" id="shareBtn" onclick="copyShareLink()">Copy shareable link</button>
       </div>
     </div>
-    <h1>Protecting your ROAS is usually <em>costing you real profit.</em></h1>
+    <h1>Find the spend level that <em>maximises gross profit.</em></h1>
     <p class="lead">
-      Model what happens to your digital ad revenue and gross profit at every spend level —
-      across Google, Meta, and other paid digital channels — assuming realistic diminishing
-      returns. Edit your account numbers below, then drag the sliders to find the spend level
-      that maximises profit, not ROAS.
+      Model how your digital ad revenue and gross profit respond to changes in spend —
+      across Google, Meta, and other paid channels — with realistic diminishing returns.
+      Enter your account numbers, then drag the sliders to explore scenarios.
     </p>
   </div>
 
@@ -1381,7 +1380,7 @@
   <!-- ===== RECOMMENDATION BAR ===== -->
   <div class="rec-bar">
     <div class="left">
-      <div class="rec-label">PROFIT-MAXIMISING SCENARIO</div>
+      <div class="rec-label">Profit-maximising spend</div>
       <h2 id="recHeadline">Loading…</h2>
       <div class="rec-detail" id="recDetail">—</div>
     </div>
@@ -1564,7 +1563,7 @@
 
   <!-- ===== VERDICT (plain-language persuasion paragraph) ===== -->
   <div class="verdict">
-    <div class="kicker">THE VERDICT — share this with your client</div>
+    <div class="kicker">Scenario summary</div>
     <p id="verdictText">Loading…</p>
   </div>
 
@@ -1583,19 +1582,15 @@
       <span id="nProfLabel">gross profit</span> is <span class="live-num" id="nProf">—</span>.
       Compared to the current spend, that is
       <span class="live-num" id="nDProf">—</span> in <span id="nProfLabel2">gross profit</span>
-      and <span class="live-num" id="nDRev">—</span> in additional revenue
-      feeding brand momentum, repeat customers, and organic lift.
-    </p>
-    <p style="color: var(--text-dim); font-size: 14px; margin-top: 18px;">
-      ROAS is a ratio. Profit is <strong style="color: var(--accent);">rupees</strong>. The business is paid in rupees.
+      and <span class="live-num" id="nDRev">—</span> in revenue.
     </p>
   </div>
 
   <!-- ===== CAUTIONS & MODEL LIMITS ===== -->
   <details class="cautions-wrap">
     <summary>
-      ⚠ Cautions &amp; model limits — read before presenting to a client
-      <span class="sub">9 things this tool doesn't model. Click to expand.</span>
+      Model limits &amp; assumptions
+      <span class="sub">9 things this calculator doesn't model</span>
     </summary>
     <div class="cautions-body">
 
@@ -1688,10 +1683,9 @@
       <details class="caution-item">
         <summary>9. This is a model, not a forecast</summary>
         <div class="body">
-          The math is directional. It exists to <strong>shape the conversation about scale</strong>
-          — not to commit to a specific monthly revenue number. Use it to show the client the
-          shape of the curve, explain why protecting ROAS is usually wrong, and agree on a
-          gradual scale-up plan. Don't use it as a hard forecast or KPI target.
+          The math is directional. It exists to illustrate the shape of the response curve
+          for your specific inputs — not to commit to a specific monthly revenue number.
+          Use it as a discussion framework, not as a hard forecast or KPI target.
         </div>
       </details>
 
@@ -2183,20 +2177,20 @@ function updateRecBar() {
   const dRev = REC.revenue - BASE.revenue;
 
   document.getElementById('recHeadline').textContent =
-    `Scale to ₹${totalL}L total spend`;
+    `₹${totalL}L total spend`;
   let recHtml =
-    `Performance <strong>₹${perfL}L</strong> + Awareness <strong>₹${awareL}L</strong> → ` +
+    `Performance <strong>₹${perfL}L</strong> + Awareness <strong>₹${awareL}L</strong>. ` +
     `Revenue <strong>₹${revL}L</strong> at <strong>${REC.roas.toFixed(2)}x</strong> blended ROAS. ` +
-    `Gross profit: <strong>₹${profL}L/mo</strong> — that is ` +
-    `<strong>${dProf >= 0 ? '+' : ''}${fmtL(dProf)}/mo</strong> higher than today, ` +
-    `with <strong>${dRev >= 0 ? '+' : ''}${fmtL(dRev)}/mo</strong> more revenue.`;
+    `Gross profit <strong>₹${profL}L/mo</strong> ` +
+    `(<strong>${dProf >= 0 ? '+' : ''}${fmtL(dProf)}</strong> vs current, ` +
+    `with <strong>${dRev >= 0 ? '+' : ''}${fmtL(dRev)}</strong> more revenue).`;
   if (FIXED_COSTS_ENABLED) {
     const netAtPeak = REC.grossProfit - FIXED_COSTS;
     const netAtBase = BASE.grossProfit - FIXED_COSTS;
     const dNet = netAtPeak - netAtBase;
-    recHtml += ` <br><span style="color: var(--text-dim); font-size: 13px;">After ₹${(FIXED_COSTS/100000).toFixed(2)}L fixed costs, ` +
-      `net profit: <strong style="color: var(--accent); font-family: var(--mono);">₹${(netAtPeak/100000).toFixed(2)}L/mo</strong> ` +
-      `(<strong style="color: var(--accent); font-family: var(--mono);">${dNet >= 0 ? '+' : ''}${fmtL(dNet)}/mo</strong> vs today).</span>`;
+    recHtml += ` <br><span style="color: var(--text-2); font-size: 13px;">After ₹${(FIXED_COSTS/100000).toFixed(2)}L fixed costs, ` +
+      `net profit <strong style="color: var(--accent); font-family: var(--mono);">₹${(netAtPeak/100000).toFixed(2)}L/mo</strong> ` +
+      `(<strong style="color: var(--accent); font-family: var(--mono);">${dNet >= 0 ? '+' : ''}${fmtL(dNet)}</strong> vs current).</span>`;
   }
   document.getElementById('recDetail').innerHTML = recHtml;
 }
@@ -2538,57 +2532,50 @@ function updateVerdict() {
   const pLbl = 'gross profit';
 
   if (atCurrent) {
-    // Client at current state — show the opportunity cost
+    // At current state — describe the peak neutrally
     if (dAtPeak > 1000) {
-      html = `At your current spend of <strong>${fmtL(BASE.total)}</strong> and ` +
-        `<strong>${BASE.roas.toFixed(2)}x</strong> ROAS, you are leaving ` +
-        `<strong>${fmtL(dAtPeak)}/month</strong> of ${pLbl} on the table. ` +
-        `Profit peaks at <strong>${fmtL(REC.total)}</strong> of spend at a lower ` +
-        `<strong>${REC.roas.toFixed(2)}x</strong> ROAS — but with ` +
-        `<strong>${fmtL(dRevAtPeak)}/month</strong> more in revenue and ` +
-        `<strong>${fmtL(peakProfit)}/month</strong> in ${pLbl} in your bank account. ` +
-        `That is the real cost of protecting a ROAS ratio instead of maximising profit in rupees.`;
+      html = `At current spend of <strong>${fmtL(BASE.total)}</strong>, gross profit is ` +
+        `<strong>${fmtL(BASE.grossProfit)}/month</strong> at a <strong>${BASE.roas.toFixed(2)}x</strong> ` +
+        `blended ROAS. Based on the elasticity assumption, gross profit peaks at ` +
+        `<strong>${fmtL(REC.total)}</strong> of spend — with <strong>${fmtL(dRevAtPeak)}</strong> ` +
+        `more monthly revenue and <strong>${fmtL(peakProfit)}/month</strong> of gross profit ` +
+        `(<strong>${REC.roas.toFixed(2)}x</strong> blended ROAS). The difference at the peak is ` +
+        `<strong>${fmtL(dAtPeak)}/month</strong> of additional gross profit.`;
     } else {
-      html = `You are already at (or very close to) the profit peak. Holding steady at ` +
-        `<strong>${fmtL(BASE.total)}</strong> is the right call. ` +
-        `Scaling further would add revenue but shrink ${pLbl}.`;
+      html = `Current spend is at or near the profit peak for this elasticity. ` +
+        `Scaling further would grow revenue but shrink gross profit.`;
     }
   } else if (atPeak) {
-    // Client is at the recommendation — reinforce
-    html = `This is the profit-maximising scenario. Compared to current spend, ` +
-      `revenue grows by <strong>${fmtL(dRevAtPeak)}/month</strong> and ${pLbl} grows by ` +
-      `<strong>${fmtL(dAtPeak)}/month</strong>. ROAS drops from ` +
-      `<strong>${BASE.roas.toFixed(2)}x</strong> to <strong>${REC.roas.toFixed(2)}x</strong>, but ` +
-      `because revenue grew faster than ROAS dropped, you earn more rupees of profit — ` +
-      `which is the number the business actually spends.`;
+    // At the profit peak
+    html = `This scenario is at the modelled profit peak. Compared to current spend, revenue grows by ` +
+      `<strong>${fmtL(dRevAtPeak)}/month</strong> and gross profit grows by ` +
+      `<strong>${fmtL(dAtPeak)}/month</strong>. Blended ROAS moves from ` +
+      `<strong>${BASE.roas.toFixed(2)}x</strong> to <strong>${REC.roas.toFixed(2)}x</strong>.`;
   } else if (s.total < BASE.total) {
-    // Below current — squeeze scenario
+    // Below current
     const dProf = s.profit - BASE.profit;
     const dRev = s.revenue - BASE.revenue;
-    html = `Cutting spend to <strong>${fmtL(s.total)}</strong> moves your blended ROAS to ` +
-      `<strong>${s.roas.toFixed(2)}x</strong>, but you lose ` +
-      `<strong class="neg">${fmtL(Math.abs(dRev))}/month</strong> of revenue and ` +
-      `<strong class="neg">${fmtL(Math.abs(dProf))}/month</strong> of ${pLbl}. ` +
-      `The higher ROAS % looks better on a dashboard, but the bank account is smaller. ` +
-      `The profit peak is ${fmtL(REC.total - s.total)} <em>higher</em> than where you are now.`;
+    html = `At <strong>${fmtL(s.total)}</strong> of spend, revenue is ` +
+      `<strong>${fmtL(Math.abs(dRev))}/month</strong> lower than current and gross profit is ` +
+      `<strong>${fmtL(Math.abs(dProf))}/month</strong> lower. Blended ROAS: ` +
+      `<strong>${s.roas.toFixed(2)}x</strong>. The modelled profit peak is at ` +
+      `<strong>${fmtL(REC.total)}</strong>.`;
   } else if (s.total > REC.total) {
-    // Past the peak — diminishing returns
+    // Past the peak
     const dFromPeak = peakProfit - scenarioProfit;
-    html = `You have scaled past the profit peak. Revenue is still growing ` +
-      `(<strong>+${fmtL(s.revenue - BASE.revenue)}/month</strong> vs current), but ${pLbl} is ` +
-      `<strong class="neg">${fmtL(dFromPeak)}/month</strong> lower than it could be at the peak. ` +
-      `Pull performance spend back toward <strong>${fmtL(REC.total)}</strong> to maximise profit. ` +
-      `Beyond the peak, every extra rupee earns less than it costs.`;
+    html = `At <strong>${fmtL(s.total)}</strong> of spend, revenue continues to grow ` +
+      `(<strong>+${fmtL(s.revenue - BASE.revenue)}/month</strong> vs current) but gross profit is ` +
+      `<strong>${fmtL(dFromPeak)}/month</strong> below the peak at <strong>${fmtL(REC.total)}</strong>. ` +
+      `The elasticity curve has flattened past this point.`;
   } else {
     // Between current and peak
     const dProf = s.profit - BASE.profit;
     const dRev = s.revenue - BASE.revenue;
-    html = `At <strong>${fmtL(s.total)}</strong> of spend, you add ` +
-      `<strong>${fmtL(dRev)}/month</strong> of revenue and ` +
-      `<strong>${fmtL(dProf)}/month</strong> of ${pLbl} compared to current. ` +
-      `You are still ${fmtL(REC.total - s.total)} below the profit peak at <strong>${fmtL(REC.total)}</strong>, ` +
-      `which is where profit stops growing and starts to decline. ` +
-      `Every rupee of spend between here and the peak is still profitable.`;
+    html = `At <strong>${fmtL(s.total)}</strong> of spend, revenue is ` +
+      `<strong>${fmtL(dRev)}/month</strong> higher than current and gross profit is ` +
+      `<strong>${fmtL(dProf)}/month</strong> higher. Blended ROAS: ` +
+      `<strong>${s.roas.toFixed(2)}x</strong>. The modelled profit peak is at ` +
+      `<strong>${fmtL(REC.total)}</strong> — another <strong>${fmtL(REC.total - s.total)}</strong> up.`;
   }
 
   // Net-profit addendum — only when fixed costs toggle is on
