@@ -1073,7 +1073,7 @@
         </div>
         <div class="field">
           <label>Awareness amplifier</label>
-          <input type="number" id="inAwareAmp" value="3" min="0.5" max="10" step="0.1" />
+          <input type="number" id="inAwareAmp" value="1" min="0.5" max="10" step="0.1" />
         </div>
         <div style="grid-column: 1 / -1; display: flex; gap: 16px; flex-wrap: wrap; margin-top: 4px;">
           <label class="sub-toggle-row" style="margin-top: 0;">
@@ -1092,10 +1092,10 @@
       </div>
       <div class="hint" style="margin-top: 10px;">
         <strong>Off:</strong> 100% of awareness spend and fixed costs are subtracted from digital profit.<br>
-        <strong>On:</strong> Only the digital share is subtracted. <strong>Awareness amplifier</strong> accounts for
-        the fact that digital awareness has an outsized effect on digital channels specifically — 3× is a common
-        starting point (e.g. 7% digital share → 21% of awareness spend). Adjust based on how digital-native your
-        awareness channels are.
+        <strong>On:</strong> Only the digital share is subtracted. <strong>Awareness amplifier</strong> (default
+        <strong>1.0</strong>, same treatment as fixed costs) can be bumped to 2–3 if you believe digital awareness
+        has an outsized effect on digital channels specifically — e.g. at 7% digital share and amplifier 3,
+        21% of awareness spend gets charged. Capped at 100% regardless of inputs.
       </div>
     </div>
 
@@ -1493,7 +1493,7 @@ let EXCLUDE_AWARENESS = false;
 // Proportional allocation state
 let PROP_ALLOC_ENABLED = false;
 let DIGITAL_PCT = 100;        // 0-100, digital revenue as % of total business
-let AWARE_AMP = 3.0;          // multiplier on digital share for awareness
+let AWARE_AMP = 1.0;          // multiplier on digital share for awareness
 let PROP_APPLY_FC = true;
 let PROP_APPLY_AWARE = true;
 
