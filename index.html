@@ -779,6 +779,148 @@
     border: 1px solid var(--accent);
   }
 
+  /* ===== CAUTIONS & MODEL LIMITS ===== */
+  .cautions-wrap {
+    margin-bottom: 32px;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 14px;
+    background: rgba(245, 158, 11, 0.04);
+    overflow: hidden;
+  }
+  .cautions-wrap > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--warn);
+    user-select: none;
+  }
+  .cautions-wrap > summary::-webkit-details-marker { display: none; }
+  .cautions-wrap > summary::before {
+    content: '▸';
+    display: inline-block;
+    transition: transform 0.15s;
+    font-size: 12px;
+    width: 12px;
+  }
+  .cautions-wrap[open] > summary::before { transform: rotate(90deg); }
+  .cautions-wrap > summary .sub {
+    font-weight: 400;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-left: auto;
+  }
+  .cautions-body {
+    padding: 6px 24px 20px 40px;
+  }
+  .caution-item {
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 14px 0 12px;
+  }
+  .caution-item > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+    user-select: none;
+  }
+  .caution-item > summary::-webkit-details-marker { display: none; }
+  .caution-item > summary::before {
+    content: '▸';
+    display: inline-block;
+    transition: transform 0.15s;
+    font-size: 11px;
+    color: var(--text-faint);
+    flex-shrink: 0;
+    margin-top: 2px;
+    width: 10px;
+  }
+  .caution-item[open] > summary::before { transform: rotate(90deg); }
+  .caution-item .body {
+    margin-top: 10px;
+    padding-left: 20px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text-dim);
+  }
+  .caution-item .body strong { color: var(--text); }
+
+  /* ===== EXCLUDE AWARENESS + PROPORTIONAL FC TOGGLES ===== */
+  .sub-toggle-row {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text);
+    user-select: none;
+    cursor: pointer;
+  }
+  .sub-toggle-row input[type="checkbox"] {
+    accent-color: var(--accent);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+  }
+  .proportional-fc-inputs {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: none;
+    gap: 12px;
+    grid-template-columns: 1fr 1fr;
+  }
+  .proportional-fc-inputs.visible { display: grid; }
+  .proportional-fc-inputs .field label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .proportional-fc-inputs .field input {
+    width: 100%;
+    background: var(--bg-elev-2);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 9px 10px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+  }
+  .proportional-fc-inputs .field input:focus { border-color: var(--accent); }
+  .proportional-fc-computed {
+    grid-column: 1 / -1;
+    font-size: 11px;
+    color: var(--text-dim);
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+  }
+  .proportional-fc-computed strong {
+    color: var(--accent);
+    font-family: var(--mono);
+  }
+
+  /* Awareness excluded visual state */
+  .awareness-excluded {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
   /* ===== FOOTER ===== */
   .footer {
     border-top: 1px solid var(--border);
@@ -795,11 +937,12 @@
 
   <!-- ===== HERO ===== -->
   <div class="hero">
-    <div class="eyebrow">AD SPEND SCALE CALCULATOR</div>
+    <div class="eyebrow">AD SPEND SCALE CALCULATOR · GOOGLE, META &amp; PAID DIGITAL</div>
     <h1>Protecting your ROAS is usually <em>costing you real profit.</em> See how much, live.</h1>
     <p class="lead">
-      This calculator models what happens to your revenue and gross profit at every ad spend level,
-      assuming realistic diminishing returns — the first ₹ you add earns less than the ones already spent.
+      This calculator models what happens to your digital ad revenue and gross profit at every
+      spend level — across Google, Meta, and other paid digital channels. It assumes realistic
+      diminishing returns: the first ₹ you add earns less than the ones already spent.
       Edit your account's starting numbers below, then drag the sliders to find the spend level
       that maximises gross profit (not ROAS).
     </p>
@@ -891,6 +1034,68 @@
         At <strong id="elasticityShort">0.76</strong>, +10% spend → <span id="elasticityExample">+7.5%</span> revenue,
         +20% → <span id="elasticityExample20">+14.9%</span>, +100% → <span id="elasticityExample100">+69.4%</span>.
         Source: Nielsen meta-analysis of 58 CPG studies (median 0.71).
+      </div>
+    </div>
+
+    <!-- Exclude Awareness toggle -->
+    <div class="elasticity-wrap" style="margin-top: 12px;">
+      <div class="header">
+        <div class="lbl">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
+            <input type="checkbox" id="excludeAwareToggle" style="accent-color: var(--accent); width:16px; height:16px; cursor:pointer;" />
+            Exclude Awareness from the model
+          </label>
+          <span class="info" data-tip="When on, awareness spend and assisted revenue are set to zero everywhere. Use this when the client conversation should focus purely on direct-response performance channels — e.g. because awareness impact is hard to measure or lifts offline channels too.">i</span>
+        </div>
+      </div>
+      <div class="hint" style="margin-top: 8px;">
+        Awareness channels (YouTube, Demand Gen, Display) lift branded search, direct traffic, and offline sales —
+        but these signals are often hard to measure and easy to argue about. Turn this on to remove awareness
+        from the model entirely so the scale conversation is purely about performance channels.
+      </div>
+    </div>
+
+    <!-- Proportional allocation sub-panel -->
+    <div class="elasticity-wrap" style="margin-top: 12px;">
+      <div class="header">
+        <div class="lbl">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
+            <input type="checkbox" id="propAllocToggle" style="accent-color: var(--accent); width:16px; height:16px; cursor:pointer;" />
+            Enable proportional allocation (optional)
+          </label>
+          <span class="info" data-tip="For businesses where digital is only a portion of total revenue. Fixed costs and awareness spend are scaled to their digital share, so the ad-scale decision isn't unfairly burdened by the whole company's overhead.">i</span>
+        </div>
+      </div>
+      <div class="proportional-fc-inputs" id="propAllocInputs">
+        <div class="field">
+          <label>Digital revenue % of total business</label>
+          <input type="number" id="inDigitalPct" value="100" min="0" max="100" step="0.5" />
+        </div>
+        <div class="field">
+          <label>Awareness amplifier</label>
+          <input type="number" id="inAwareAmp" value="3" min="0.5" max="10" step="0.1" />
+        </div>
+        <div style="grid-column: 1 / -1; display: flex; gap: 16px; flex-wrap: wrap; margin-top: 4px;">
+          <label class="sub-toggle-row" style="margin-top: 0;">
+            <input type="checkbox" id="propApplyFC" checked />
+            Apply to fixed costs
+          </label>
+          <label class="sub-toggle-row" style="margin-top: 0;">
+            <input type="checkbox" id="propApplyAware" checked />
+            Apply to awareness spend
+          </label>
+        </div>
+        <div class="proportional-fc-computed" id="propAllocComputed">
+          Fixed costs will be scaled to <strong id="propFcPct">100%</strong> ·
+          Awareness spend will be scaled to <strong id="propAwarePct">100%</strong>
+        </div>
+      </div>
+      <div class="hint" style="margin-top: 10px;">
+        <strong>Off:</strong> 100% of awareness spend and fixed costs are subtracted from digital profit.<br>
+        <strong>On:</strong> Only the digital share is subtracted. <strong>Awareness amplifier</strong> accounts for
+        the fact that digital awareness has an outsized effect on digital channels specifically — 3× is a common
+        starting point (e.g. 7% digital share → 21% of awareness spend). Adjust based on how digital-native your
+        awareness channels are.
       </div>
     </div>
 
@@ -1141,8 +1346,119 @@
     </p>
   </div>
 
+  <!-- ===== CAUTIONS & MODEL LIMITS ===== -->
+  <details class="cautions-wrap">
+    <summary>
+      ⚠ Cautions &amp; model limits — read before presenting to a client
+      <span class="sub">9 things this tool doesn't model. Click to expand.</span>
+    </summary>
+    <div class="cautions-body">
+
+      <details class="caution-item">
+        <summary>1. This tool models paid digital ads only — not total business revenue</summary>
+        <div class="body">
+          Revenue shown here is the revenue attributed to paid digital channels (Google, Meta, and
+          similar). It is NOT your total business revenue. If your total business is much larger
+          than your online paid ads spend, the curve you see is a slice of the business, not the
+          whole picture. When presenting, be explicit: <strong>"this is what happens to the paid
+          digital revenue, which is a portion of total revenue."</strong>
+        </div>
+      </details>
+
+      <details class="caution-item">
+        <summary>2. Halo effect is real and uncounted</summary>
+        <div class="body">
+          Paid ads lift organic search, direct traffic, email performance, branded search, and
+          for many brands, <strong>offline store visits</strong>. This calculator credits zero of
+          that halo. The real ROI of paid ads is usually 15–30% higher than what you see here
+          (sometimes far more for strong brands). The tool is intentionally conservative — if
+          anything, the case for scaling is <strong>stronger</strong> than the numbers suggest.
+        </div>
+      </details>
+
+      <details class="caution-item">
+        <summary>3. Awareness revenue is underestimated on purpose</summary>
+        <div class="body">
+          Default Awareness ROAS is 0x because brand-building pays back through channels we can't
+          measure directly: branded search, offline sales, view-through conversions, LTV lift.
+          Real contribution is positive but hard to quantify. Use the <strong>"Exclude Awareness
+          from the model"</strong> toggle if you want the cleanest performance-only story for
+          the client.
+        </div>
+      </details>
+
+      <details class="caution-item">
+        <summary>4. Fixed costs and awareness spend should be proportional, not total</summary>
+        <div class="body">
+          If your company's total fixed costs are large but digital is only a small slice of
+          total business revenue, don't subtract the whole company's overhead from digital ad
+          profit. The <strong>"Proportional allocation"</strong> toggle lets you scale fixed
+          costs and awareness spend to digital's share of the business. For awareness, an
+          amplifier (default 3×) accounts for the fact that digital awareness has an outsized
+          effect on digital channels specifically.
+        </div>
+      </details>
+
+      <details class="caution-item">
+        <summary>5. The profit peak may not be reachable in 1–2 months</summary>
+        <div class="body">
+          Even if the math says "profit peak is at 5× current spend," you cannot scale overnight.
+          Learning phase re-triggers, CPC inflation, creative fatigue, operational bottlenecks,
+          and cash-flow gaps all limit practical scale-up to roughly <strong>20–30% per month</strong>.
+          The profit peak is the theoretical maximum, not next month's budget.
+        </div>
+      </details>
+
+      <details class="caution-item">
+        <summary>6. Elasticity changes with seasonality, creative, and competitors</summary>
+        <div class="body">
+          This model uses one fixed elasticity number. In reality, elasticity rises during peak
+          season and with fresh creative, and falls in off-season or when competitors scale
+          aggressively. <strong>Re-run this tool every month</strong> with the latest data —
+          don't treat one run as a permanent answer.
+        </div>
+      </details>
+
+      <details class="caution-item">
+        <summary>7. Gross margin can shift as you scale</summary>
+        <div class="body">
+          Aggressive scaling often pushes the product mix toward lower-margin items (discounts,
+          entry-level SKUs, clearance). Real blended gross margin may drop 2–5 percentage points
+          at much higher spend levels. If you're planning a 3× scale, it's worth modelling a
+          scenario with a slightly lower margin to stress-test the conclusion.
+        </div>
+      </details>
+
+      <details class="caution-item">
+        <summary>8. Attribution noise grows with scale</summary>
+        <div class="body">
+          At small spend, ROAS signals are clean. At 5× spend, cross-device journeys,
+          view-through conversions, and platform-reported conversions add more noise. Don't
+          trust last-click ROAS blindly at higher spend levels — cross-check with
+          back-end/GA4 numbers, and be conservative about "reported" ROAS gains from scaled
+          campaigns.
+        </div>
+      </details>
+
+      <details class="caution-item">
+        <summary>9. This is a model, not a forecast</summary>
+        <div class="body">
+          The math is directional. It exists to <strong>shape the conversation about scale</strong>
+          — not to commit to a specific monthly revenue number. Use it to show the client the
+          shape of the curve, explain why protecting ROAS is usually wrong, and agree on a
+          gradual scale-up plan. Don't use it as a hard forecast or KPI target.
+        </div>
+      </details>
+
+    </div>
+  </details>
+
   <!-- ===== FOOTER ===== -->
   <div class="footer">
+    <strong>Scope:</strong> Models paid digital ads only (Google, Meta, and similar performance
+    and awareness channels). Does not include organic, direct, email, marketplace, or offline
+    revenue — see the cautions section above for what this tool does and doesn't capture.
+    <br><br>
     <strong>Model assumptions:</strong>
     Performance revenue follows a diminishing-returns curve with elasticity ≈ 0.76
     (+10% spend → +7.5% revenue, +20% spend → +15% revenue, +30% spend → +22.5% revenue).
@@ -1168,8 +1484,18 @@ let BASELINE = { perf: 800000, aware: 150000 };
 let BASE_PERF_REV = 4000000;   // 5x of ₹8L perf spend
 let BASE_AWARE_REV = 0;        // 0x — awareness is brand-building, no direct attribution
 let MARGIN = 0.40;
-let FIXED_COSTS = 0;          // monthly fixed costs subtracted when toggle is on
+let FIXED_COSTS = 0;          // monthly fixed costs (user-typed raw value)
 let FIXED_COSTS_ENABLED = false;
+
+// Exclude Awareness toggle — when on, awareness spend & rev treated as 0
+let EXCLUDE_AWARENESS = false;
+
+// Proportional allocation state
+let PROP_ALLOC_ENABLED = false;
+let DIGITAL_PCT = 100;        // 0-100, digital revenue as % of total business
+let AWARE_AMP = 3.0;          // multiplier on digital share for awareness
+let PROP_APPLY_FC = true;
+let PROP_APPLY_AWARE = true;
 
 // Computed after each input change
 let BASE = null;
@@ -1217,28 +1543,59 @@ function modelAwareRevenue(awareSpend) {
   if (awareSpend <= 0 || BASELINE.aware <= 0 || BASE_AWARE_REV <= 0) return 0;
   return BASE_AWARE_REV * Math.pow(awareSpend / BASELINE.aware, AWARE_ELASTICITY);
 }
+
+// Returns the share of awareness spend that counts against digital profit.
+// 1.0 = full spend. < 1.0 = proportional share × amplifier.
+function awareShare() {
+  if (!PROP_ALLOC_ENABLED || !PROP_APPLY_AWARE) return 1.0;
+  const digitalShare = Math.max(0, Math.min(1, DIGITAL_PCT / 100));
+  return Math.max(0, Math.min(1, digitalShare * AWARE_AMP));
+}
+// Returns the share of fixed costs subtracted from digital profit.
+function fcShare() {
+  if (!PROP_ALLOC_ENABLED || !PROP_APPLY_FC) return 1.0;
+  return Math.max(0, Math.min(1, DIGITAL_PCT / 100));
+}
+
 function compute(perf, aware) {
+  // Exclude awareness zeros it out everywhere
+  if (EXCLUDE_AWARENESS) aware = 0;
+
   const perfRev = modelPerfRevenue(perf);
-  const awareRev = modelAwareRevenue(aware);
+  const awareRev = EXCLUDE_AWARENESS ? 0 : modelAwareRevenue(aware);
   const revenue = perfRev + awareRev;
-  const total = perf + aware;
-  const roas = total > 0 ? revenue / total : 0;
+
+  // Proportional allocation: only a share of awareness spend is charged to digital profit.
+  // The slider/display still shows the full aware amount (what the business is actually paying).
+  const effectiveAware = aware * awareShare();
+  const total = perf + effectiveAware;
+  // "displayed total" for KPI cards still uses the full awareness spend — that's what the
+  // business is writing checks for, even if only a share gets charged to digital profit.
+  const displayedTotal = perf + aware;
+
+  const roas = displayedTotal > 0 ? revenue / displayedTotal : 0;
+  // Gross profit uses the EFFECTIVE (proportional) awareness cost
   const grossProfit = revenue * MARGIN - total;
-  // Net profit = gross − fixed costs (if toggle is on). Flat subtraction.
-  // The profit peak is always computed against grossProfit — fixed costs
-  // don't change where the optimum is.
-  const fixedCosts = FIXED_COSTS_ENABLED ? FIXED_COSTS : 0;
+
+  // Fixed costs: proportional share if enabled
+  const fixedCosts = FIXED_COSTS_ENABLED ? (FIXED_COSTS * fcShare()) : 0;
   const netProfit = grossProfit - fixedCosts;
-  // `profit` is kept as an alias for grossProfit so the optimizer and chart
-  // always use the same curve regardless of toggle state.
   const profit = grossProfit;
-  return { perf, aware, total, perfRev, awareRev, revenue, roas, profit, grossProfit, netProfit, fixedCosts };
+
+  return {
+    perf, aware,
+    total: displayedTotal,       // what we show in KPIs (full spend)
+    effectiveTotal: total,       // what we use internally for profit math
+    perfRev, awareRev, revenue, roas, profit, grossProfit, netProfit, fixedCosts,
+    effectiveAware,
+  };
 }
 
 function recomputeOptimum() {
   let best = { profit: -Infinity, perf: BASELINE.perf };
-  // Sweep widely so we always find the profit peak
-  for (let p = 50000; p <= 4000000; p += 5000) {
+  // Sweep across the full slider range (₹0 → ₹2 Cr) to find the profit peak.
+  // 10K step is fine enough for ~₹10K precision on the optimum.
+  for (let p = 0; p <= 20000000; p += 10000) {
     const s = compute(p, BASELINE.aware);
     if (s.profit > best.profit) { best = { profit: s.profit, perf: p }; }
   }
@@ -1801,13 +2158,67 @@ function rebuildFromInputs() {
   FIXED_COSTS = fc;
   FIXED_COSTS_ENABLED = fcOn;
 
+  // Read new toggles
+  const excludeAwareEl = document.getElementById('excludeAwareToggle');
+  if (excludeAwareEl) EXCLUDE_AWARENESS = excludeAwareEl.checked;
+
+  const propAllocEl = document.getElementById('propAllocToggle');
+  if (propAllocEl) PROP_ALLOC_ENABLED = propAllocEl.checked;
+
+  const digPctEl = document.getElementById('inDigitalPct');
+  if (digPctEl) DIGITAL_PCT = parseNum('inDigitalPct', 100);
+
+  const awareAmpEl = document.getElementById('inAwareAmp');
+  if (awareAmpEl) AWARE_AMP = parseNum('inAwareAmp', 3.0);
+
+  const propFcEl = document.getElementById('propApplyFC');
+  if (propFcEl) PROP_APPLY_FC = propFcEl.checked;
+
+  const propAwareEl = document.getElementById('propApplyAware');
+  if (propAwareEl) PROP_APPLY_AWARE = propAwareEl.checked;
+
+  // Sync proportional allocation panel visibility
+  const propInputs = document.getElementById('propAllocInputs');
+  if (propInputs) {
+    if (PROP_ALLOC_ENABLED) propInputs.classList.add('visible');
+    else propInputs.classList.remove('visible');
+  }
+  // Computed % display
+  const propFcPctEl = document.getElementById('propFcPct');
+  const propAwarePctEl = document.getElementById('propAwarePct');
+  if (propFcPctEl) propFcPctEl.textContent = (fcShare() * 100).toFixed(1) + '%';
+  if (propAwarePctEl) propAwarePctEl.textContent = (awareShare() * 100).toFixed(1) + '%';
+
+  // Grey out awareness inputs when excluded
+  const awareFieldIds = ['inBaseAware', 'inBaseAwareRoas', 'inBaseAwareRev'];
+  awareFieldIds.forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (EXCLUDE_AWARENESS) {
+      el.disabled = true;
+      el.parentElement.classList.add('awareness-excluded');
+    } else {
+      el.disabled = false;
+      el.parentElement.classList.remove('awareness-excluded');
+    }
+  });
+  const awareSliderEl = document.getElementById('awareSlider');
+  if (awareSliderEl) {
+    awareSliderEl.disabled = EXCLUDE_AWARENESS;
+    if (EXCLUDE_AWARENESS) awareSliderEl.value = 0;
+  }
+
   // Sync fixed costs UI state
   document.getElementById('fixedCostsSlider').disabled = !fcOn;
   document.getElementById('fixedCostsVal').textContent = fcOn ? fmtL(fc) : '₹0';
   document.getElementById('fixedCostsVal').style.color = fcOn ? 'var(--accent)' : 'var(--text-faint)';
   const fcHintEl = document.getElementById('fixedCostsHint');
   if (fcOn) {
-    fcHintEl.innerHTML = `<strong>On.</strong> Net profit = gross profit − ₹${(fc/100000).toFixed(2)}L fixed costs. ` +
+    const effFc = fc * fcShare();
+    const propHint = (PROP_ALLOC_ENABLED && PROP_APPLY_FC)
+      ? ` Proportional allocation ON: only <strong>₹${(effFc/100000).toFixed(2)}L</strong> (${(fcShare()*100).toFixed(1)}%) is subtracted.`
+      : '';
+    fcHintEl.innerHTML = `<strong>On.</strong> Net profit = gross profit − ₹${(fc/100000).toFixed(2)}L fixed costs.${propHint} ` +
       `Fixed costs include agency fees, tech stack, salaries, office rent, founder salary. ` +
       `The profit peak stays in the same place — fixed costs are a flat subtraction.`;
   } else {
@@ -2309,6 +2720,42 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('awareSlider').value = BASELINE.aware;
     document.querySelectorAll('.preset-chip').forEach((c) => c.classList.remove('active'));
     updateAll();
+  });
+
+  // Wire Exclude Awareness toggle
+  const excludeAwareEl = document.getElementById('excludeAwareToggle');
+  if (excludeAwareEl) {
+    excludeAwareEl.addEventListener('change', () => {
+      rebuildFromInputs();
+      updateAll();
+    });
+  }
+
+  // Wire Proportional Allocation toggle + inputs
+  const propAllocEl = document.getElementById('propAllocToggle');
+  if (propAllocEl) {
+    propAllocEl.addEventListener('change', () => {
+      rebuildFromInputs();
+      updateAll();
+    });
+  }
+  ['inDigitalPct', 'inAwareAmp'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('input', () => {
+        rebuildFromInputs();
+        updateAll();
+      });
+    }
+  });
+  ['propApplyFC', 'propApplyAware'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('change', () => {
+        rebuildFromInputs();
+        updateAll();
+      });
+    }
   });
 
   // Wire fixed costs toggle + slider
