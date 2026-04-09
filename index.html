@@ -906,8 +906,11 @@
         </div>
         <div class="val" id="fixedCostsVal" style="color: var(--text-faint);">₹0</div>
       </div>
-      <input type="range" id="fixedCostsSlider" min="0" max="2000000" step="10000" value="300000" disabled />
-      <div class="hint" id="fixedCostsHint">
+      <input type="range" id="fixedCostsSlider" min="0" max="10000000" step="25000" value="300000" disabled />
+      <div class="tick-row">
+        <span>₹0</span><span>₹25L</span><span>₹50L</span><span>₹75L</span><span>₹1Cr</span>
+      </div>
+      <div class="hint" id="fixedCostsHint" style="margin-top: 8px;">
         <strong>Off.</strong> Gross profit is shown everywhere (which is the right number for deciding
         ad scale). Turn on to subtract fixed costs (salaries, rent, agency fees, tech stack) and show
         net profit to the client. The profit peak does not move when you change fixed costs —
