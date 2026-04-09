@@ -1168,12 +1168,6 @@
     font-weight: 500;
   }
 
-  /* Awareness excluded visual state */
-  .awareness-excluded {
-    opacity: 0.4;
-    pointer-events: none;
-  }
-
   /* ===== FOOTER ===== */
   .footer {
     border-top: 1px solid var(--line);
@@ -1293,24 +1287,6 @@
         At <strong id="elasticityShort">0.76</strong>, +10% spend → <span id="elasticityExample">+7.5%</span> revenue,
         +20% → <span id="elasticityExample20">+14.9%</span>, +100% → <span id="elasticityExample100">+69.4%</span>.
         Source: Nielsen meta-analysis of 58 CPG studies (median 0.71).
-      </div>
-    </div>
-
-    <!-- Exclude Awareness toggle -->
-    <div class="elasticity-wrap" style="margin-top: 12px;">
-      <div class="header">
-        <div class="lbl">
-          <label style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none;">
-            <input type="checkbox" id="excludeAwareToggle" style="accent-color: var(--accent); width:16px; height:16px; cursor:pointer;" />
-            Exclude Awareness from the model
-          </label>
-          <span class="info" data-tip="When on, awareness spend and assisted revenue are set to zero everywhere. Use this when the client conversation should focus purely on direct-response performance channels — e.g. because awareness impact is hard to measure or lifts offline channels too.">i</span>
-        </div>
-      </div>
-      <div class="hint" style="margin-top: 8px;">
-        Awareness channels (YouTube, Demand Gen, Display) lift branded search, direct traffic, and offline sales —
-        but these signals are often hard to measure and easy to argue about. Turn this on to remove awareness
-        from the model entirely so the scale conversation is purely about performance channels.
       </div>
     </div>
 
@@ -1619,11 +1595,10 @@
       <details class="caution-item">
         <summary>3. Awareness revenue is underestimated on purpose</summary>
         <div class="body">
-          Default Awareness ROAS is 0x because brand-building pays back through channels we can't
-          measure directly: branded search, offline sales, view-through conversions, LTV lift.
-          Real contribution is positive but hard to quantify. Use the <strong>"Exclude Awareness
-          from the model"</strong> toggle if you want the cleanest performance-only story for
-          the client.
+          Default Awareness ROAS is 0x because brand-building pays back through channels that are
+          hard to measure directly: branded search lift, offline sales, view-through conversions,
+          LTV lift. Real contribution is positive but hard to quantify. If you want to focus purely
+          on performance channels, set the awareness spend to zero.
         </div>
       </details>
 
@@ -1726,9 +1701,6 @@ let MARGIN = 0.40;
 let FIXED_COSTS = 0;          // monthly fixed costs (user-typed raw value)
 let FIXED_COSTS_ENABLED = false;
 
-// Exclude Awareness toggle — when on, awareness spend & rev treated as 0
-let EXCLUDE_AWARENESS = false;
-
 // Proportional allocation state
 let PROP_ALLOC_ENABLED = false;
 let DIGITAL_PCT = 100;        // 0-100, digital revenue as % of total business
@@ -1795,11 +1767,8 @@ function fcShare() {
 }
 
 function compute(perf, aware) {
-  // Exclude awareness zeros it out everywhere
-  if (EXCLUDE_AWARENESS) aware = 0;
-
   const perfRev = modelPerfRevenue(perf);
-  const awareRev = EXCLUDE_AWARENESS ? 0 : modelAwareRevenue(aware);
+  const awareRev = modelAwareRevenue(aware);
   const revenue = perfRev + awareRev;
 
   // Proportional allocation: only a share of awareness spend is charged to digital profit.
@@ -2401,9 +2370,6 @@ function rebuildFromInputs() {
   FIXED_COSTS_ENABLED = fcOn;
 
   // Read new toggles
-  const excludeAwareEl = document.getElementById('excludeAwareToggle');
-  if (excludeAwareEl) EXCLUDE_AWARENESS = excludeAwareEl.checked;
-
   const propAllocEl = document.getElementById('propAllocToggle');
   if (propAllocEl) PROP_ALLOC_ENABLED = propAllocEl.checked;
 
@@ -2426,24 +2392,6 @@ function rebuildFromInputs() {
   const propFcPctEl = document.getElementById('propFcPct');
   if (propFcPctEl) propFcPctEl.textContent = (fcShare() * 100).toFixed(1) + '%';
 
-  // Grey out awareness inputs when excluded
-  const awareFieldIds = ['inBaseAware', 'inBaseAwareRoas', 'inBaseAwareRev'];
-  awareFieldIds.forEach((id) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (EXCLUDE_AWARENESS) {
-      el.disabled = true;
-      el.parentElement.classList.add('awareness-excluded');
-    } else {
-      el.disabled = false;
-      el.parentElement.classList.remove('awareness-excluded');
-    }
-  });
-  const awareSliderEl = document.getElementById('awareSlider');
-  if (awareSliderEl) {
-    awareSliderEl.disabled = EXCLUDE_AWARENESS;
-    if (EXCLUDE_AWARENESS) awareSliderEl.value = 0;
-  }
 
   // Sync fixed costs UI state
   document.getElementById('fixedCostsSlider').disabled = !fcOn;
@@ -2951,15 +2899,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.preset-chip').forEach((c) => c.classList.remove('active'));
     updateAll();
   });
-
-  // Wire Exclude Awareness toggle
-  const excludeAwareEl = document.getElementById('excludeAwareToggle');
-  if (excludeAwareEl) {
-    excludeAwareEl.addEventListener('change', () => {
-      rebuildFromInputs();
-      updateAll();
-    });
-  }
 
   // Wire Proportional Allocation toggle + inputs
   const propAllocEl = document.getElementById('propAllocToggle');
