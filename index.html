@@ -94,6 +94,18 @@
     padding: 24px 28px;
     margin-bottom: 28px;
   }
+  .inputs-panel.mirroring {
+    border-color: rgba(245, 158, 11, 0.35);
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.08);
+  }
+  .inputs-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
   .inputs-panel h3 {
     font-size: 14px;
     font-weight: 600;
@@ -103,14 +115,43 @@
   .inputs-panel .sub {
     font-size: 12px;
     color: var(--text-dim);
-    margin-bottom: 18px;
+  }
+  .inputs-panel .sub.mirror-hint {
+    color: var(--warn);
+    font-weight: 500;
+  }
+  .btn-set-current {
+    background: var(--warn);
+    border: 0;
+    color: #0a0d14;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    display: none;
+  }
+  .btn-set-current.visible { display: inline-block; }
+  .btn-set-current:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
   }
   .inputs-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 14px;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
   }
-  @media (max-width: 900px) { .inputs-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 1200px) { .inputs-grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 900px) { .inputs-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 700px) { .inputs-grid { grid-template-columns: repeat(2, 1fr); } }
+  .input-field input.mirroring {
+    color: var(--warn);
+    border-color: rgba(245, 158, 11, 0.35);
+    background: rgba(245, 158, 11, 0.05);
+  }
   .input-field {
     display: flex;
     flex-direction: column;
@@ -775,9 +816,14 @@
   </div>
 
   <!-- ===== EDITABLE INPUTS ===== -->
-  <div class="inputs-panel">
-    <h3>Your account — edit these to match reality</h3>
-    <p class="sub">All numbers on this page are computed from the values below. Change them and everything updates live.</p>
+  <div class="inputs-panel" id="inputsPanel">
+    <div class="inputs-panel-header">
+      <div>
+        <h3>Your account — edit these to match reality</h3>
+        <p class="sub" id="inputsPanelSub">All numbers on this page are computed from the values below. Change them and everything updates live.</p>
+      </div>
+      <button class="btn-set-current" id="btnSetCurrent" onclick="lockScenarioAsBaseline()">✓ Set as current</button>
+    </div>
     <div class="inputs-grid">
       <div class="input-field">
         <label>Current perf. spend
@@ -787,6 +833,20 @@
         <div class="hint">PMax, Search, Shopping</div>
       </div>
       <div class="input-field">
+        <label>Performance ROAS
+          <span class="info" data-tip="Revenue divided by performance spend. Change this to recompute performance revenue. Or type a new revenue below and ROAS updates automatically.">i</span>
+        </label>
+        <input type="number" id="inBasePerfRoas" value="4.5" step="0.1" min="0" />
+        <div class="hint">Perf. revenue ÷ perf. spend</div>
+      </div>
+      <div class="input-field">
+        <label>Perf. revenue (month)
+          <span class="info" data-tip="Direct-attributed revenue from your performance channels last month. Linked to spend and ROAS — editing any two updates the third.">i</span>
+        </label>
+        <input type="number" id="inBasePerfRev" value="3600000" step="10000" />
+        <div class="hint">Direct revenue from perf. channels</div>
+      </div>
+      <div class="input-field">
         <label>Current awareness spend
           <span class="info" data-tip="Monthly spend on upper-funnel, brand-building channels: YouTube, Demand Gen, Display, Meta reach campaigns. Set to 0 if you don't run these.">i</span>
         </label>
@@ -794,18 +854,18 @@
         <div class="hint">YouTube, Demand Gen, Display</div>
       </div>
       <div class="input-field">
-        <label>Perf. revenue (month)
-          <span class="info" data-tip="Direct-attributed revenue from your performance channels last month. Use last-click or your platform's default attribution.">i</span>
+        <label>Awareness ROAS
+          <span class="info" data-tip="Conservative assisted revenue ratio for awareness channels. Default 0.5x because awareness is brand-building, not direct-response. Real assisted revenue is usually higher but invisible in last-click reports. Editable.">i</span>
         </label>
-        <input type="number" id="inBasePerfRev" value="3600000" step="10000" />
-        <div class="hint">Direct revenue from perf. channels</div>
+        <input type="number" id="inBaseAwareRoas" value="0.5" step="0.05" min="0" />
+        <div class="hint">Typical 0.3x – 1.0x</div>
       </div>
       <div class="input-field">
         <label>Awareness assisted rev.
-          <span class="info" data-tip="Conservative estimate of directly-attributable assisted revenue from awareness channels. Default is 0.5x of awareness spend (awareness is typically a long-term brand investment, not a direct-response channel). Real assisted revenue is usually higher but invisible in last-click reports.">i</span>
+          <span class="info" data-tip="Assisted revenue from awareness channels. Linked to awareness spend and awareness ROAS — editing any two updates the third.">i</span>
         </label>
         <input type="number" id="inBaseAwareRev" value="75000" step="10000" />
-        <div class="hint">≈ 0.5x of awareness spend</div>
+        <div class="hint">Spend × awareness ROAS</div>
       </div>
       <div class="input-field">
         <label>Gross margin %
@@ -1684,6 +1744,10 @@ function updateAll() {
   mainChart.data.datasets[4].data = [{ x: s.total, y: s.revenue }];
   mainChart.update('none');
 
+  // Mirror current slider scenario into the top input fields (visual only,
+  // baseline stays locked until user clicks "Set as current")
+  mirrorSliderToInputs(s);
+
   // Update verdict and URL
   updateVerdict();
   writeURL();
@@ -1692,6 +1756,7 @@ function updateAll() {
 // ========================================================================
 // REBUILD WHEN INPUTS CHANGE
 // ========================================================================
+// Called when baseline inputs are directly edited (locks the new values).
 function rebuildFromInputs() {
   const bp = parseFloat(document.getElementById('inBasePerf').value) || 800000;
   const ba = parseFloat(document.getElementById('inBaseAware').value) || 150000;
@@ -1701,6 +1766,12 @@ function rebuildFromInputs() {
   const el = parseFloat(document.getElementById('elasticitySlider').value) || 0.76;
   const fc = parseFloat(document.getElementById('fixedCostsSlider').value) || 0;
   const fcOn = document.getElementById('fixedCostsToggle').checked;
+
+  // Recompute ROAS fields from current spend/rev (keep them in sync)
+  const perfRoasField = document.getElementById('inBasePerfRoas');
+  if (bp > 0) perfRoasField.value = (bpr / bp).toFixed(2);
+  const awareRoasField = document.getElementById('inBaseAwareRoas');
+  if (ba > 0) awareRoasField.value = (bar / ba).toFixed(2);
 
   BASELINE = { perf: bp, aware: ba };
   BASE_PERF_REV = bpr;
@@ -1863,6 +1934,149 @@ function updateVerdict() {
   }
 
   el.innerHTML = html;
+}
+
+// ========================================================================
+// MIRROR MODE (slider drives top fields visually, baseline stays locked)
+// ========================================================================
+let mirroringActive = false;
+
+function enterMirrorMode() {
+  if (mirroringActive) return;
+  mirroringActive = true;
+  document.getElementById('inputsPanel').classList.add('mirroring');
+  ['inBasePerf','inBasePerfRoas','inBasePerfRev','inBaseAware','inBaseAwareRoas','inBaseAwareRev'].forEach((id) => {
+    document.getElementById(id).classList.add('mirroring');
+  });
+  document.getElementById('inputsPanelSub').textContent =
+    'Mirroring slider position. Click "Set as current" to lock this as your new baseline.';
+  document.getElementById('inputsPanelSub').className = 'sub mirror-hint';
+  document.getElementById('btnSetCurrent').classList.add('visible');
+}
+
+function exitMirrorMode() {
+  if (!mirroringActive) return;
+  mirroringActive = false;
+  document.getElementById('inputsPanel').classList.remove('mirroring');
+  ['inBasePerf','inBasePerfRoas','inBasePerfRev','inBaseAware','inBaseAwareRoas','inBaseAwareRev'].forEach((id) => {
+    document.getElementById(id).classList.remove('mirroring');
+  });
+  document.getElementById('inputsPanelSub').textContent =
+    'All numbers on this page are computed from the values below. Change them and everything updates live.';
+  document.getElementById('inputsPanelSub').className = 'sub';
+  document.getElementById('btnSetCurrent').classList.remove('visible');
+}
+
+// Called every time the user drags a scenario slider — mirrors the current
+// scenario state into the top input fields (without touching the baseline).
+function mirrorSliderToInputs(s) {
+  // Only mirror if the slider position has meaningfully drifted from baseline
+  const drifted = Math.abs(s.perf - BASELINE.perf) > 1000
+               || Math.abs(s.aware - BASELINE.aware) > 500;
+  if (!drifted) {
+    if (mirroringActive) {
+      exitMirrorMode();
+      // Restore inputs to actual baseline values
+      document.getElementById('inBasePerf').value = BASELINE.perf;
+      document.getElementById('inBasePerfRev').value = Math.round(BASE.perfRev);
+      document.getElementById('inBasePerfRoas').value = (BASE.perfRev / BASELINE.perf).toFixed(2);
+      document.getElementById('inBaseAware').value = BASELINE.aware;
+      document.getElementById('inBaseAwareRev').value = Math.round(BASE.awareRev);
+      if (BASELINE.aware > 0) {
+        document.getElementById('inBaseAwareRoas').value = (BASE.awareRev / BASELINE.aware).toFixed(2);
+      }
+    }
+    return;
+  }
+  enterMirrorMode();
+  document.getElementById('inBasePerf').value = Math.round(s.perf);
+  document.getElementById('inBasePerfRev').value = Math.round(s.perfRev);
+  document.getElementById('inBasePerfRoas').value = (s.perfRev / s.perf).toFixed(2);
+  document.getElementById('inBaseAware').value = Math.round(s.aware);
+  document.getElementById('inBaseAwareRev').value = Math.round(s.awareRev);
+  if (s.aware > 0) {
+    document.getElementById('inBaseAwareRoas').value = (s.awareRev / s.aware).toFixed(2);
+  }
+}
+
+// Clicking "Set as current" locks the current scenario position as the new baseline
+function lockScenarioAsBaseline() {
+  const perf = parseInt(document.getElementById('perfSlider').value, 10);
+  const aware = parseInt(document.getElementById('awareSlider').value, 10);
+  const s = compute(perf, aware);
+  // Write the new baseline values into the inputs
+  document.getElementById('inBasePerf').value = Math.round(perf);
+  document.getElementById('inBasePerfRev').value = Math.round(s.perfRev);
+  document.getElementById('inBasePerfRoas').value = (s.perfRev / perf).toFixed(2);
+  document.getElementById('inBaseAware').value = Math.round(aware);
+  document.getElementById('inBaseAwareRev').value = Math.round(s.awareRev);
+  if (aware > 0) {
+    document.getElementById('inBaseAwareRoas').value = (s.awareRev / aware).toFixed(2);
+  }
+  exitMirrorMode();
+  rebuildFromInputs();
+  // Reset sliders to the new baseline so deltas go to zero
+  document.getElementById('perfSlider').value = BASELINE.perf;
+  document.getElementById('awareSlider').value = BASELINE.aware;
+  resetHistory();
+  updateAll();
+}
+
+// ========================================================================
+// TRI-DIRECTIONAL ROAS ↔ SPEND ↔ REVENUE LINK (baseline inputs)
+// ========================================================================
+// When any of the three are edited, the other one (or two) auto-update.
+// Strategy: when ROAS is edited, revenue updates (holds spend). When spend
+// is edited, revenue updates (holds ROAS). When revenue is edited, ROAS
+// updates (holds spend).
+function handleRoasEdit() {
+  const spend = parseFloat(document.getElementById('inBasePerf').value) || 0;
+  const roas = parseFloat(document.getElementById('inBasePerfRoas').value) || 0;
+  if (spend > 0 && roas >= 0) {
+    const rev = spend * roas;
+    document.getElementById('inBasePerfRev').value = Math.round(rev);
+  }
+}
+function handleSpendEdit() {
+  const spend = parseFloat(document.getElementById('inBasePerf').value) || 0;
+  const roas = parseFloat(document.getElementById('inBasePerfRoas').value) || 0;
+  // Hold ROAS constant, recompute revenue
+  if (spend > 0 && roas >= 0) {
+    const rev = spend * roas;
+    document.getElementById('inBasePerfRev').value = Math.round(rev);
+  }
+}
+function handleRevenueEdit() {
+  const spend = parseFloat(document.getElementById('inBasePerf').value) || 0;
+  const rev = parseFloat(document.getElementById('inBasePerfRev').value) || 0;
+  // Hold spend constant, recompute ROAS
+  if (spend > 0) {
+    document.getElementById('inBasePerfRoas').value = (rev / spend).toFixed(2);
+  }
+}
+
+// Awareness tri-directional handlers
+function handleAwareRoasEdit() {
+  const spend = parseFloat(document.getElementById('inBaseAware').value) || 0;
+  const roas = parseFloat(document.getElementById('inBaseAwareRoas').value) || 0;
+  if (spend > 0 && roas >= 0) {
+    document.getElementById('inBaseAwareRev').value = Math.round(spend * roas);
+  }
+}
+function handleAwareSpendEdit() {
+  const spend = parseFloat(document.getElementById('inBaseAware').value) || 0;
+  const roas = parseFloat(document.getElementById('inBaseAwareRoas').value) || 0;
+  // Hold ROAS constant, recompute revenue
+  if (spend > 0 && roas >= 0) {
+    document.getElementById('inBaseAwareRev').value = Math.round(spend * roas);
+  }
+}
+function handleAwareRevenueEdit() {
+  const spend = parseFloat(document.getElementById('inBaseAware').value) || 0;
+  const rev = parseFloat(document.getElementById('inBaseAwareRev').value) || 0;
+  if (spend > 0) {
+    document.getElementById('inBaseAwareRoas').value = (rev / spend).toFixed(2);
+  }
 }
 
 // ========================================================================
@@ -2038,18 +2252,26 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('perfSlider').addEventListener('input', updateAll);
   document.getElementById('awareSlider').addEventListener('input', updateAll);
 
-  // Wire input fields — rebuild base when user edits
-  ['inBasePerf','inBaseAware','inBasePerfRev','inBaseAwareRev','inMargin'].forEach((id) => {
-    document.getElementById(id).addEventListener('input', () => {
-      rebuildFromInputs();
-      // After rebuild, reset sliders to new baseline so user isn't stranded
-      document.getElementById('perfSlider').value = BASELINE.perf;
-      document.getElementById('awareSlider').value = BASELINE.aware;
-      // Deactivate preset chips since user is customising
-      document.querySelectorAll('.preset-chip').forEach((c) => c.classList.remove('active'));
-      updateAll();
-    });
-  });
+  // Wire input fields — direct edits always exit mirror mode + rebuild baseline
+  const directEdit = (handler) => () => {
+    // Any direct edit exits mirror mode and writes a new baseline
+    exitMirrorMode();
+    if (handler) handler();
+    rebuildFromInputs();
+    // Reset sliders to new baseline so deltas go to zero
+    document.getElementById('perfSlider').value = BASELINE.perf;
+    document.getElementById('awareSlider').value = BASELINE.aware;
+    document.querySelectorAll('.preset-chip').forEach((c) => c.classList.remove('active'));
+    updateAll();
+  };
+
+  document.getElementById('inBasePerf').addEventListener('input', directEdit(handleSpendEdit));
+  document.getElementById('inBasePerfRoas').addEventListener('input', directEdit(handleRoasEdit));
+  document.getElementById('inBasePerfRev').addEventListener('input', directEdit(handleRevenueEdit));
+  document.getElementById('inBaseAware').addEventListener('input', directEdit(handleAwareSpendEdit));
+  document.getElementById('inBaseAwareRoas').addEventListener('input', directEdit(handleAwareRoasEdit));
+  document.getElementById('inBaseAwareRev').addEventListener('input', directEdit(handleAwareRevenueEdit));
+  document.getElementById('inMargin').addEventListener('input', directEdit());
 
   // Wire elasticity slider
   document.getElementById('elasticitySlider').addEventListener('input', () => {
