@@ -1037,7 +1037,7 @@
         <div class="lbl">Performance Spend <span class="sub">direct revenue channels</span></div>
         <div class="val"><span id="perfLabel">—</span><span class="pct" id="perfPct">baseline</span></div>
       </div>
-      <input type="range" id="perfSlider" min="0" max="20000000" step="50000" value="800000" />
+      <input type="range" id="perfSlider" min="0" max="20000000" step="1000" value="800000" />
       <div class="tick-row" id="perfTicks">
         <span>₹0</span><span>₹25L</span><span>₹50L</span><span>₹75L</span><span>₹1Cr</span><span>₹1.25Cr</span><span>₹1.5Cr</span><span>₹1.75Cr</span><span>₹2Cr</span>
       </div>
@@ -1062,7 +1062,7 @@
         <div class="lbl">Awareness Spend <span class="sub">assisted revenue · 60–90 day lag</span></div>
         <div class="val"><span id="awareLabel">—</span><span class="pct" id="awarePct">baseline</span></div>
       </div>
-      <input type="range" id="awareSlider" min="0" max="5000000" step="25000" value="150000" />
+      <input type="range" id="awareSlider" min="0" max="5000000" step="1000" value="150000" />
       <div class="tick-row">
         <span>₹0</span><span>₹10L</span><span>₹20L</span><span>₹30L</span><span>₹40L</span><span>₹50L</span>
       </div>
@@ -1988,6 +1988,13 @@ function exitMirrorMode() {
 // Called every time the user drags a scenario slider — mirrors the current
 // scenario state into the top input fields (without touching the baseline).
 function mirrorSliderToInputs(s) {
+  // CRITICAL: if the user is currently typing in one of the baseline inputs,
+  // do NOT mirror — that would overwrite what they're typing.
+  const activeId = document.activeElement && document.activeElement.id;
+  const baselineInputs = ['inBasePerf','inBasePerfRoas','inBasePerfRev',
+                          'inBaseAware','inBaseAwareRoas','inBaseAwareRev','inMargin'];
+  if (baselineInputs.indexOf(activeId) !== -1) return;
+
   // Only mirror if the slider position has meaningfully drifted from baseline
   const drifted = Math.abs(s.perf - BASELINE.perf) > 1000
                || Math.abs(s.aware - BASELINE.aware) > 500;
